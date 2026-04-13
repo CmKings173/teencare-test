@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { BookOpen, Plus, Clock, Calendar } from 'lucide-react';
+import { BookOpen, Plus, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Class } from '../types';
 
