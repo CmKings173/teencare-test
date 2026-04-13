@@ -98,7 +98,7 @@ Frontend có sẵn nút **"Bơm Test Data"** để nạp:
 docker-compose up postgres -d
 ```
 ### 2. Backend (3000): `cd backend && npm install && npm run start:dev`
-### 3. Frontend (3003): `cd frontend && npm install && npm run dev`
+### 3. Frontend (5173): `cd frontend && npm install && npm run dev`
 
 
 > **Lưu ý test API:** Dự án chạy tự động tạo các collection rỗng, vui lòng sử dụng Postman POST vào `http://localhost:3000/api/classes`, `api/students`, `api/subscriptions` để chèn dữ liệu mẫu gốc trước khi vào giao diện Test.
