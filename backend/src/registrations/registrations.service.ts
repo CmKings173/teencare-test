@@ -59,8 +59,11 @@ export class RegistrationsService {
 
       const existingRegs = await manager.find(Registration, { where: { student_id: studentId }, relations: ['class'] });
       for (const reg of existingRegs) {
+        if (reg.class_id === classId) {
+          throw new BadRequestException('Học sinh này đã đăng ký lớp học này rồi.');
+        }
         if (reg.class.day_of_week === cls.day_of_week && this.slotsOverlap(reg.class.time_slot, cls.time_slot)) {
-          throw new BadRequestException('Time conflict');
+          throw new BadRequestException(`Trùng lịch học: Học sinh đã có lớp "${reg.class.name}" (${reg.class.time_slot}) vào ngày ${reg.class.day_of_week}.`);
         }
       }
 
