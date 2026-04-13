@@ -27,7 +27,7 @@ export default function App() {
       await api.post(`/classes`, { name: 'Lập trình Python', subject: 'IT', day_of_week: 'Thứ Bảy', time_slot: '09:00-11:00', teacher_name: 'Thầy Vũ', max_students: 20 });
 
       await api.post(`/subscriptions`, { student_id: s1.data.id, package_name: 'VIP', start_date: '2026-01-01', end_date: '2026-12-31', total_sessions: 30 });
-      await api.post(`/subscriptions`, { student_id: s2.data.id, package_name: 'Standard', start_date: '2026-01-01', end_date: '2026-06-31', total_sessions: 15 });
+      await api.post(`/subscriptions`, { student_id: s2.data.id, package_name: 'Standard', start_date: '2026-01-01', end_date: '2026-06-30', total_sessions: 15 });
       await api.post(`/subscriptions`, { student_id: s3.data.id, package_name: 'Trial', start_date: '2026-01-01', end_date: '2026-02-28', total_sessions: 5 });
 
       toast.success('Đã bơm Data thành công!');
@@ -49,7 +49,7 @@ export default function App() {
             <Layers className="text-white w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">Teencare<span className="text-indigo-600">.io</span></h1>
+            <h1 className="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">Teencare</h1>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Workspace</p>
           </div>
         </div>
