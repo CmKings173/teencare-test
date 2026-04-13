@@ -8,10 +8,9 @@ Bài kiểm tra kỹ thuật - Vị trí Product Builder.
 - **DevOps:** Docker & Docker Compose.
 
 ## 🎯 Chức năng nổi bật (Nghiệp vụ cốt lõi)
-1. **Chống Overbooking Lớp Học:** Sử dụng Pessimistic Locking (Khóa bi quan DB) qua cấu trúc `setLock('pessimistic_write')` trong Database Transaction (TypeORM) để tránh lỗi đếm ảo sĩ số lớp nếu 2 phụ huynh bấm đăng ký cùng 1 mili-giây. 
-2. **Kiểm tra Trùng Lịch tự động (Schedule Overlaping):** Chuyển đổi khung giờ String `18:00-19:30` thành đơn vị minutes để check giao thoa lịch. Không cho phép học sinh học 2 lớp đè giờ lên nhau.
-3. **Logic Hủy Lớp Tinh Tế:** Hàm Delete tự đoán ngày diễn ra buổi học sắp tới ở tương lai (căn cứ theo day_of_week hiện tại), tính thời gian cách móc học và quyết định: **Hoàn 1 buổi vào gói Subscription** nếu `> 24h`, hoặc **Không hoàn** nếu `< 24h`.
-4. **Auto Sync Database:** Mode synchronize Schema (Dành cho bản testing) chạy 1 phát tự ra hết bảng.
+1. **Chống Overbooking Lớp Học:** Sử dụng Pessimistic Locking (Khóa bi quan DB) để tránh lỗi đếm ảo sĩ số lớp. 
+2. **Kiểm tra Trùng Lịch tự động:** Chuyển đổi khung giờ String thành minutes để check giao thoa lịch học sinh.
+3. **Logic Hủy Lớp Tinh Tế:** Tự động hoàn buổi vào gói nếu hủy trước > 24h.
 
 ## 🚀 Hướng dẫn chạy tự động chuẩn CI/CD (Docker Compose)
 1. Cài đặt Docker trên máy.
@@ -21,22 +20,77 @@ Bài kiểm tra kỹ thuật - Vị trí Product Builder.
    ```
 3. Truy cập Front-end: `http://localhost:3003`
 
-## 🛠️ (Tùy chọn) Chạy cục bộ phục vụ cho Live Code
-### 1. Chạy CSDL (Postgres):
-```bash
-docker-compose up postgres -d
-```
-### 2. Chạy Backend (Port 3000):
-```bash
-cd backend
-npm install
-npm run start:dev
-```
-### 3. Chạy Frontend (Port 5173 - Mặc định Vite):
-```bash
-cd frontend
-npm install
-npm run dev
+---
+
+## 📊 Database Schema (PostgreSQL)
+
+Dự án sử dụng Relational Database với cấu trúc tối ưu cho logic quản lý lớp học. Sơ đồ thực thể (ERD):
+
+```mermaid
+erDiagram
+    PARENTS ||--o{ STUDENTS : "giám hộ"
+    STUDENTS ||--o{ SUBSCRIPTIONS : "sở hữu"
+    STUDENTS ||--o{ REGISTRATIONS : "đăng ký"
+    CLASSES ||--o{ REGISTRATIONS : "chứa"
+
+    PARENTS {
+        uuid id
+        string name
+        string phone
+        string email
+    }
+    STUDENTS {
+        uuid id
+        string name
+        date dob
+        string gender
+        int current_grade
+        uuid parent_id
+    }
+    CLASSES {
+        uuid id
+        string name
+        string subject
+        string day_of_week
+        string time_slot
+        int max_students
+    }
+    SUBSCRIPTIONS {
+        uuid id
+        uuid student_id
+        string package_name
+        date start_date
+        date end_date
+        int total_sessions
+        int used_sessions
+    }
 ```
 
-> **Lưu ý test API:** Dự án chạy tự động tạo các collection rỗng, vui lòng sử dụng Postman POST vào `http://localhost:3000/api/classes`, `api/students`, `api/subscriptions` để chèn dữ liệu mẫu gốc trước khi vào giao diện Test.
+---
+
+## 🛠️ Danh sách API chính & Ví dụ truy vấn
+
+### 1. Phụ huynh & Học sinh
+- **Tạo Phụ huynh:** `POST /api/parents`
+- **Tạo Học sinh:** `POST /api/students`
+- **Xem chi tiết:** `GET /api/students/{id}` (Kèm thông tin Parent)
+
+### 2. Lớp học & Đăng ký
+- **Lấy danh sách theo ngày:** `GET /api/classes?day=Chủ Nhật`
+- **Đăng ký vào lớp:** `POST /api/classes/{class_id}/register` (Kiểm tra: Lớp đầy, Trùng lịch, Gói học).
+- **Hủy lịch:** `DELETE /api/registrations/{id}` (Hoàn buổi nếu > 24h).
+
+---
+
+## 🧪 Dữ liệu mẫu (Seed Data)
+Frontend có sẵn nút **"Bơm Test Data"** để nạp:
+- 2 phụ huynh mẫu.
+- 3 học sinh liên kết.
+- 3 lớp học với các khung giờ chồng lấn.
+- 3 gói Subscriptions với trạng thái khác nhau.
+
+---
+
+## 🛠️ (Tùy chọn) Chạy cục bộ
+### 1. Backend (3000): `cd backend && npm install && npm run start:dev`
+### 2. Frontend (5173): `cd frontend && npm install && npm run dev`
