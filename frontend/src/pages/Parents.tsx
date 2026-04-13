@@ -74,21 +74,19 @@ export default function Parents() {
             <tr>
               <th className="p-4">Họ và Tên</th>
               <th className="p-4">Số điện thoại</th>
-              <th className="p-4">Địa chỉ Email</th>
-              <th className="p-4 text-right">ID hệ thống</th>
+              <th className="p-4 text-right">Địa chỉ Email</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {parents.length === 0 ? (
               <tr>
-                <td colSpan={4} className="p-10 text-center text-slate-400 italic">Chưa có dữ liệu phụ huynh.</td>
+                <td colSpan={3} className="p-10 text-center text-slate-400 italic">Chưa có dữ liệu phụ huynh.</td>
               </tr>
             ) : parents.map(p => (
               <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                 <td className="p-4 font-bold text-slate-700">{p.name}</td>
                 <td className="p-4 ">{p.phone}</td>
-                <td className="p-4 text-slate-500">{p.email}</td>
-                <td className="p-4 text-right font-mono text-[10px] text-slate-400">{p.id}</td>
+                <td className="p-4 text-right text-slate-500">{p.email}</td>
               </tr>
             ))}
           </tbody>
