@@ -45,17 +45,20 @@ export class RegistrationsService {
                                .setLock('pessimistic_write')
                                .where('class.id = :id', { id: classId })
                                .getOne();
-      if (!cls) throw new NotFoundException('Class not found');
-
+      if (!cls) throw new NotFoundException('Không tìm thấy lớp học.');
       const count = await manager.count(Registration, { where: { class_id: classId } });
-      if (count >= cls.max_students) throw new BadRequestException('Class is full');
+      if (count >= cls.max_students) throw new BadRequestException('Lớp học đã đạt sĩ số tối đa.');
 
-      const activeSub = await manager.createQueryBuilder(Subscription, 'sub')
-                                     .where('sub.student_id = :sid', { sid: studentId })
-                                     .andWhere('sub.end_date >= :now', { now: new Date() })
-                                     .andWhere('sub.used_sessions < sub.total_sessions')
-                                     .getOne();
-      if (!activeSub) throw new BadRequestException('No active subscription');
+      const sub = await manager.createQueryBuilder(Subscription, 'sub')
+                               .where('sub.student_id = :sid', { sid: studentId })
+                               .orderBy('sub.end_date', 'DESC')
+                               .getOne();
+
+      if (!sub) throw new BadRequestException('Học sinh chưa có gói học nào. Vui lòng kích hoạt gói học trước.');
+      if (new Date(sub.end_date) < new Date()) throw new BadRequestException('Gói học của học sinh đã hết hạn.');
+      if (sub.used_sessions >= sub.total_sessions) throw new BadRequestException('Gói học đã hết số buổi sử dụng.');
+
+      const activeSub = sub;
 
       const existingRegs = await manager.find(Registration, { where: { student_id: studentId }, relations: ['class'] });
       for (const reg of existingRegs) {
@@ -80,7 +83,7 @@ export class RegistrationsService {
   async cancel(id: string) {
     return this.dataSource.transaction(async (manager) => {
       const reg = await manager.findOne(Registration, { where: { id }, relations: ['class'] });
-      if (!reg) throw new NotFoundException('Registration not found');
+      if (!reg) throw new NotFoundException('Không tìm thấy bản đăng ký lớp học này.');
 
       const nextClassSec = this.nextClassTimestamp(reg.class.day_of_week, reg.class.time_slot);
       const nowSec = Math.floor(Date.now() / 1000);

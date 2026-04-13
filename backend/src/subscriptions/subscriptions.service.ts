@@ -9,7 +9,7 @@ export class SubscriptionsService {
   create(data: any) { return this.repo.save(data); }
   async useSession(id: string) {
     const sub = await this.repo.findOne({ where: { id } });
-    if (!sub) throw new NotFoundException('Subscription not found');
+    if (!sub) throw new NotFoundException('Không tìm thấy gói học.');
     sub.used_sessions += 1;
     return this.repo.save(sub);
   }
